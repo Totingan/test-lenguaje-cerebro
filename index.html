@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿CUÁL ES EL LENGUAJE DE TU CEREBRO?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-background {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-bottom: 0.75rem;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+        }
+        .btn-option {
+            background-color: #e0e7ff; /* Indigo ligero */
+            color: #3730a3; /* Indigo oscuro */
+            border: 1px solid #c7d2fe;
+        }
+        .btn-option:hover {
+            background-color: #c7d2fe;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #6b7280; /* Gris */
+            color: white;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #4b5563;
+            transform: translateY(-2px);
+        }
+        .btn-secondary:disabled {
+            background-color: #d1d5db; /* Gris claro */
+            color: #9ca3af; /* Gris medio */
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-danger {
+            background-color: #ef4444; /* Rojo */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb; /* Gris claro */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .progress-bar {
+            height: 1rem;
+            background-color: #4f46e5; /* Indigo */
+            border-radius: 0.5rem;
+            transition: width 0.3s ease-in-out;
+            text-align: center;
+            color: white;
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+        .result-highlight {
+            color: #4f46e5; /* Indigo */
+            font-weight: bold;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .intro-text {
+            font-size: 0.875rem; 
+            line-height: 1.5; 
+            text-align: left; 
+            white-space: pre-line; 
+        }
+        /* Estilos para el Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .percentage-item {
+            text-align: center;
+            padding: 0.5rem;
+            /* border: 1px solid #e5e7eb; /* Opcional: para ver los bordes de cada item */
+            /* border-radius: 0.5rem; /* Opcional */
+        }
+    </style>
+</head>
+<body class="gradient-background min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="appContainer" class="w-full max-w-md">
+
+        <div id="startScreen" class="card fade-in text-center">
+            <img src="https://placehold.co/100x100/764ba2/ffffff?text=🧠" alt="Icono de Cerebro" class="mx-auto mb-6 rounded-full w-24 h-24">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">¿CUÁL ES EL LENGUAJE DE TU CEREBRO?</h1>
+            <p class="text-gray-600 mb-8 intro-text">Por: Richard Bandler y John Grinder
+
+Elige la opción con la que más te identifiques de cada una de las preguntas y señálala.
+
+Nota: es probable que existan algunas preguntas en que no te sea fácil elegir una de las tres opciones, ya que todas te pueden agradar (esto es muy natural); aun así, haz el esfuerzo por seleccionar sólo una respuesta, la que en el fondo sea más atractiva para ti.</p>
+            <button id="startButton" class="btn btn-primary">Comenzar Test</button>
+        </div>
+
+        <div id="questionScreen" class="card fade-in hidden">
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+            </div>
+            <h2 id="questionText" class="text-xl font-semibold text-gray-700 mb-6"></h2>
+            <div id="optionsContainer" class="space-y-3">
+                </div>
+            <div class="mt-8 flex justify-between items-center"> 
+                <button id="backButton" class="btn btn-secondary w-auto px-6">Atrás</button>
+                </div>
+        </div>
+
+        <div id="resultScreen" class="card fade-in hidden text-center">
+            <img id="resultImage" src="https://placehold.co/100x100/764ba2/ffffff?text=🎉" alt="Icono de Resultado" class="mx-auto mb-6 rounded-full w-24 h-24">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">¡Resultados!</h2>
+            <p class="text-gray-700 mb-2">Tu lenguaje cerebral predominante es:</p>
+            <p id="resultText" class="text-3xl result-highlight mb-6"></p>
+            
+            <div id="scoreDetails" class="text-left text-gray-600 mb-6">
+                </div>
+            
+            <div class="mb-8">
+                <h3 class="text-lg font-semibold mb-3 text-gray-700">Proporción de tu Lenguaje:</h3>
+                <div id="percentageDetailsContainer" class="flex justify-around items-start">
+                    </div>
+            </div>
+            
+            <button id="restartButton" class="btn btn-primary">Volver a Intentar</button>
+        </div>
+    </div>
+
+    <div id="restartConfirmModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Confirmar Reinicio</h3>
+            <p class="text-gray-600 mb-6">¿Estás seguro de que quieres volver a resolver el cuestionario? Perderás tus respuestas actuales.</p>
+            <div class="flex justify-around">
+                <button id="confirmRestartButton" class="btn btn-danger w-2/5">Sí, reiniciar</button>
+                <button id="cancelRestartButton" class="btn btn-secondary w-2/5">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- DATOS DEL CUESTIONARIO ---
+        const quizData = [
+            {
+                pregunta: "¿Cuál de las siguientes actividades disfrutas más realizar?",
+                opciones: [ 
+                    { texto: "Escuchar música", categoria: "Auditivo" },
+                    { texto: "Ver películas", categoria: "Visual" },
+                    { texto: "Bailar una buena música", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "Para ti, una mañana ideal de domingo es:",
+                opciones: [ 
+                    { texto: "Quedarte en casa a descansar", categoria: "Kinestésico" },
+                    { texto: "Visitar algún museo o sitio de interés", categoria: "Auditivo" },
+                    { texto: "Ir a un centro comercial", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Cómo te orientas fácilmente?",
+                opciones: [ 
+                    { texto: "Mediante el uso de un mapa", categoria: "Visual" },
+                    { texto: "Pidiendo indicaciones", categoria: "Auditivo" },
+                    { texto: "A través de la intuición", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Cómo prefieres ocupar tu tiempo en un sitio de descanso?",
+                opciones: [ 
+                    { texto: "Leer y pensar", categoria: "Auditivo" },
+                    { texto: "Disfrutar el paisaje y conocer alrededores", categoria: "Visual" },
+                    { texto: "Descansar", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "Cuando conversa con otra persona:",
+                opciones: [ 
+                    { texto: "Tiendes a tocarla", categoria: "Kinestésico" },
+                    { texto: "Escuchas cada palabra que dice", categoria: "Auditivo" },
+                    { texto: "La observas atentamente", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Qué te halaga más?",
+                opciones: [ 
+                    { texto: "Que te digan que tienes buen aspecto", categoria: "Visual" },
+                    { texto: "Que te demuestren afecto", categoria: "Kinestésico" },
+                    { texto: "Que te digan que tienes una conversación interesante", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿De qué manera se te facilita aprender algo?",
+                opciones: [ 
+                    { texto: "Repitiéndolo en voz alta", categoria: "Auditivo" },
+                    { texto: "Leyéndolo varias veces o escribiéndolo", categoria: "Visual" },
+                    { texto: "Relacionándolo con algo divertido", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿A qué evento prefieres asistir?",
+                opciones: [ 
+                    { texto: "A una reunión social", categoria: "Kinestésico" },
+                    { texto: "A una exposición de arte", categoria: "Visual" },
+                    { texto: "A una conferencia", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿De qué manera te formas una opinión de una persona?",
+                opciones: [ 
+                    { texto: "Por lo que dice", categoria: "Auditivo" },
+                    { texto: "Por la forma de estrechar la mano", categoria: "Kinestésico" },
+                    { texto: "Por su aspecto", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Cómo te consideras?",
+                opciones: [ 
+                    { texto: "Sociable", categoria: "Kinestésico" },
+                    { texto: "Intelectual", categoria: "Auditivo" },
+                    { texto: "Atlético", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Qué tipo de películas te gustan?",
+                opciones: [ 
+                    { texto: "Clásicas", categoria: "Auditivo" },
+                    { texto: "De acción", categoria: "Visual" },
+                    { texto: "De amor", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Qué tipos de programas de televisión prefieres?",
+                opciones: [ 
+                    { texto: "Películas", categoria: "Visual" },
+                    { texto: "Cómicos y de entretenimientos", categoria: "Kinestésico" },
+                    { texto: "Noticieros", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿Cómo prefieres mantenerte en contacto con tus amistades?",
+                opciones: [ 
+                    { texto: "Por correo electrónico", categoria: "Visual" },
+                    { texto: "Tomando un café juntos", categoria: "Kinestésico" },
+                    { texto: "Por teléfono", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Si fueras a comprar un automóvil ¿cómo lo elegirías?",
+                opciones: [ 
+                    { texto: "Por su comodidad", categoria: "Kinestésico" },
+                    { texto: "Por su rendimiento", categoria: "Auditivo" },
+                    { texto: "por su diseño", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "Cuando tratas de recordar algo ¿cómo lo haces?",
+                opciones: [ 
+                    { texto: "A través de imágenes", categoria: "Visual" },
+                    { texto: "A través de emociones", categoria: "Kinestésico" },
+                    { texto: "a través de sonidos", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Si tuvieras el dinero necesario ¿qué harías?",
+                opciones: [ 
+                    { texto: "Comprar una casa de descanso", categoria: "Kinestésico" },
+                    { texto: "Viajar y conocer el mundo", categoria: "Visual" },
+                    { texto: "Estudiar en el extranjero", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿Con qué frase te identificas más?",
+                opciones: [ 
+                    { texto: "Recuerdo el rostro de alguien, pero no su nombre", categoria: "Visual" },
+                    { texto: "Me cuesta trabajo recordar el aspecto de alguien", categoria: "Kinestésico" },
+                    { texto: "Reconozco a las personas por su voz", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿Cuál de los siguientes entretenimientos prefieres?",
+                opciones: [ 
+                    { texto: "Tocar un instrumento musical", categoria: "Auditivo" },
+                    { texto: "Sacar fotografías", categoria: "Visual" },
+                    { texto: "Actividades manuales", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Cómo es tu forma de vestir?",
+                opciones: [ 
+                    { texto: "Informal y cómoda", categoria: "Kinestésico" },
+                    { texto: "Atractiva y combinada", categoria: "Visual" },
+                    { texto: "Conservadora y formal", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Si quisieras estudiar algo ¿qué elegirías?",
+                opciones: [ 
+                    { texto: "Un idioma", categoria: "Auditivo" },
+                    { texto: "Gastronomía", categoria: "Kinestésico" },
+                    { texto: "Diseño de cualquier tipo (interiores, moda, imagen, arquitectónico, artístico, automotriz, etctera).", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "Cuando asistes a un curso o conferencia ¿qué es más importante para ti?",
+                opciones: [ 
+                    { texto: "Que la información se apoye en medios visuales", categoria: "Visual" },
+                    { texto: "Poder hacer preguntas", categoria: "Auditivo" },
+                    { texto: "Que sea divertido", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "Te distingues por:",
+                opciones: [ 
+                    { texto: "Ser muy intuitivo", categoria: "Kinestésico" },
+                    { texto: "Ser analítico", categoria: "Auditivo" },
+                    { texto: "Ser observador", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Qué es lo que más disfrutas de un amanecer?",
+                opciones: [ 
+                    { texto: "La emoción de vivir un nuevo día", categoria: "Kinestésico" },
+                    { texto: "Las tonalidades del cielo", categoria: "Visual" },
+                    { texto: "El canto de las aves", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Si pudieras elegir una de las siguientes profesiones ¿qué preferirías ser?",
+                opciones: [ 
+                    { texto: "Un gran pintor", categoria: "Visual" },
+                    { texto: "Un gran actor", categoria: "Kinestésico" },
+                    { texto: "Un gran escritor", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Cuando compras ropa ¿qué es más importante?",
+                opciones: [ 
+                    { texto: "Que sea útil", categoria: "Auditivo" },
+                    { texto: "Que sea atractiva", categoria: "Visual" },
+                    { texto: "Que sea cómoda", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Qué hace que una habitación sea agradable para ti?",
+                opciones: [ 
+                    { texto: "Que sea limpia y ordenada", categoria: "Visual" },
+                    { texto: "Que sea confortable", categoria: "Kinestésico" },
+                    { texto: "Que sea silenciosa", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿Qué es más atractivo para ti?",
+                opciones: [ 
+                    { texto: "Una iluminación tenue", categoria: "Visual" },
+                    { texto: "El perfume", categoria: "Kinestésico" },
+                    { texto: "Cierto tipo de música", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿A qué tipo de espectáculo prefieres asistir?",
+                opciones: [ 
+                    { texto: "A un concierto", categoria: "Auditivo" },
+                    { texto: "A una obra de teatro o espectáculo de magia", categoria: "Visual" },
+                    { texto: "A un show cómico", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Qué te atrae más de una persona?",
+                opciones: [ 
+                    { texto: "Su trato y forma de ser", categoria: "Kinestésico" },
+                    { texto: "Su aspecto físico", categoria: "Visual" },
+                    { texto: "Su conversación", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "Cuando vas a un centro comercial ¿dónde pasas más tiempo?",
+                opciones: [ 
+                    { texto: "Tiendas de ropa", categoria: "Visual" },
+                    { texto: "Restaurantes y cafés", categoria: "Kinestésico" },
+                    { texto: "Tiendas de disco o librerías", categoria: "Auditivo" }
+                ]
+            },
+            {
+                pregunta: "¿Cuál es tu idea de una noche romántica?",
+                opciones: [ 
+                    { texto: "A la luz de las vela en un restaurante elegante", categoria: "Visual" },
+                    { texto: "Conversar y escuchar música romántica", categoria: "Auditivo" },
+                    { texto: "Bailar abrazados", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Qué es lo que más disfrutas de viajar?",
+                opciones: [ 
+                    { texto: "La comida", categoria: "Kinestésico" },
+                    { texto: "Aprender de otras culturas", categoria: "Auditivo" },
+                    { texto: "Conocer hermosos lugares", categoria: "Visual" }
+                ]
+            },
+            {
+                pregunta: "¿Qué noticias te atraen más?",
+                opciones: [ 
+                    { texto: "Culturales", categoria: "Auditivo" },
+                    { texto: "Espectáculos", categoria: "Visual" },
+                    { texto: "Sociales", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "¿Con qué frase te identificas más?",
+                opciones: [ 
+                    { texto: "Me gusta sentarme en un café a ver pasar la gente", categoria: "Visual" },
+                    { texto: "Me gusta saber lo que la gente está pensando", categoria: "Auditivo" },
+                    { texto: "Me gusta percibir como se siente la gente", categoria: "Kinestésico" }
+                ]
+            },
+            {
+                pregunta: "Elige una serie de palabras:",
+                opciones: [ 
+                    { texto: "Eco, pensar, silencio", categoria: "Auditivo" },
+                    { texto: "Emoción, estremecer, caricia", categoria: "Kinestésico" },
+                    { texto: "Brillo, imaginar, belleza", categoria: "Visual" }
+                ]
+            }
+        ];
+
+        // --- ELEMENTOS DEL DOM ---
+        const startScreen = document.getElementById('startScreen');
+        const questionScreen = document.getElementById('questionScreen');
+        const resultScreen = document.getElementById('resultScreen');
+
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const backButton = document.getElementById('backButton');
+
+        const questionTextElement = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const progressBar = document.getElementById('progressBar');
+        
+        const resultText = document.getElementById('resultText');
+        const resultImage = document.getElementById('resultImage');
+        const scoreDetails = document.getElementById('scoreDetails');
+        const percentageDetailsContainer = document.getElementById('percentageDetailsContainer'); // Contenedor para los porcentajes
+
+        // Modal de confirmación
+        const restartConfirmModal = document.getElementById('restartConfirmModal');
+        const confirmRestartButton = document.getElementById('confirmRestartButton');
+        const cancelRestartButton = document.getElementById('cancelRestartButton');
+
+
+        // --- ESTADO DEL CUESTIONARIO ---
+        let currentQuestionIndex = 0;
+        let scores = {}; 
+        let userAnswers = []; 
+
+        // --- LÓGICA DEL CUESTIONARIO ---
+
+        function initializeScores() {
+            scores = {};
+            const allCategories = new Set();
+            quizData.forEach(q => q.opciones.forEach(opt => allCategories.add(opt.categoria)));
+            allCategories.forEach(cat => scores[cat] = 0);
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            initializeScores();
+            userAnswers = new Array(quizData.length).fill(null); 
+            
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            questionScreen.classList.remove('hidden');
+            questionScreen.classList.add('fade-in');
+            restartConfirmModal.classList.add('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex < quizData.length) {
+                const currentQuestion = quizData[currentQuestionIndex];
+                questionTextElement.textContent = currentQuestion.pregunta;
+                optionsContainer.innerHTML = ''; 
+
+                currentQuestion.opciones.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option.texto;
+                    button.classList.add('btn', 'btn-option');
+                    button.addEventListener('click', () => selectOption(option.categoria));
+                    optionsContainer.appendChild(button);
+                });
+                updateProgressBar();
+                updateBackButtonState();
+            } else {
+                showResults();
+            }
+        }
+        
+        function selectOption(selectedCategory) {
+            const previousCategoryForThisQuestion = userAnswers[currentQuestionIndex];
+
+            if (previousCategoryForThisQuestion !== null) {
+                scores[previousCategoryForThisQuestion]--;
+            }
+
+            userAnswers[currentQuestionIndex] = selectedCategory; 
+            scores[selectedCategory]++; 
+            
+            currentQuestionIndex++;
+            
+            questionScreen.classList.remove('fade-in');
+            setTimeout(() => {
+                 if (currentQuestionIndex < quizData.length) {
+                    questionScreen.classList.add('fade-in');
+                 }
+                loadQuestion();
+            }, 200); 
+        }
+
+        function goBack() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                
+                const answerBeingRevisited = userAnswers[currentQuestionIndex];
+                if (answerBeingRevisited !== null) {
+                    scores[answerBeingRevisited]--; 
+                }
+
+                questionScreen.classList.remove('fade-in');
+                setTimeout(() => {
+                    questionScreen.classList.add('fade-in');
+                    loadQuestion(); 
+                }, 100);
+            }
+        }
+
+        function updateBackButtonState() {
+            backButton.disabled = currentQuestionIndex === 0;
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = (currentQuestionIndex / quizData.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressBar.textContent = progressPercentage > 0 ? `${Math.round(progressPercentage)}%` : '';
+        }
+
+        function showResults() {
+            questionScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            resultScreen.classList.add('fade-in');
+
+            initializeScores(); 
+            userAnswers.forEach(answer => {
+                if (answer !== null) { 
+                    scores[answer]++;
+                }
+            });
+
+            let predominantCategory = '';
+            let maxScore = -1;
+
+            for (const categoria in scores) {
+                if (scores[categoria] > maxScore) {
+                    maxScore = scores[categoria];
+                    predominantCategory = categoria;
+                }
+            }
+            
+            const tiedCategories = Object.keys(scores).filter(cat => scores[cat] === maxScore);
+            if (tiedCategories.length > 1) {
+                predominantCategory = tiedCategories.join(' y ');
+            }
+
+            resultText.textContent = predominantCategory;
+            
+            let resultImgSrc = "https://placehold.co/100x100/764ba2/ffffff?text=🎉";
+            const lowerPredominant = predominantCategory.toLowerCase();
+            if (lowerPredominant.includes("visual")) {
+                resultImgSrc = "https://placehold.co/100x100/667eea/ffffff?text=👁️";
+            } else if (lowerPredominant.includes("auditivo")) {
+                resultImgSrc = "https://placehold.co/100x100/764ba2/ffffff?text=👂";
+            } else if (lowerPredominant.includes("kinestésico")) {
+                resultImgSrc = "https://placehold.co/100x100/f59e0b/ffffff?text=🖐️";
+            }
+            resultImage.src = resultImgSrc;
+            resultImage.alt = `Icono de ${predominantCategory}`;
+
+            // Mostrar detalles de puntuación (puntos)
+            scoreDetails.innerHTML = '<h3 class="text-lg font-semibold mb-2">Detalle de Puntuaciones:</h3>';
+            const ulScores = document.createElement('ul');
+            ulScores.classList.add('list-disc', 'list-inside', 'mb-4');
+            const sortedCategories = Object.keys(scores).sort(); 
+            sortedCategories.forEach(categoria => {
+                 const li = document.createElement('li');
+                 li.textContent = `${categoria}: ${scores[categoria]} punto(s)`;
+                 ulScores.appendChild(li);
+            });
+            scoreDetails.appendChild(ulScores);
+
+            // Mostrar detalles de porcentajes horizontalmente
+            percentageDetailsContainer.innerHTML = ''; // Limpiar contenedor
+            const totalAnsweredQuestions = userAnswers.filter(answer => answer !== null).length;
+
+            if (totalAnsweredQuestions > 0) {
+                sortedCategories.forEach(categoria => {
+                    const percentage = (scores[categoria] / totalAnsweredQuestions) * 100;
+                    const percentageItemDiv = document.createElement('div');
+                    percentageItemDiv.classList.add('percentage-item', 'flex-1'); // flex-1 para que compartan espacio
+                    
+                    const categoryNameSpan = document.createElement('span');
+                    categoryNameSpan.classList.add('block', 'text-sm', 'text-gray-600');
+                    categoryNameSpan.textContent = categoria;
+                    
+                    const percentageValueSpan = document.createElement('span');
+                    percentageValueSpan.classList.add('block', 'text-xl', 'font-bold', 'text-gray-800');
+                    percentageValueSpan.textContent = `${percentage.toFixed(1)}%`;
+                    
+                    percentageItemDiv.appendChild(categoryNameSpan);
+                    percentageItemDiv.appendChild(percentageValueSpan);
+                    percentageDetailsContainer.appendChild(percentageItemDiv);
+                });
+            } else {
+                 const p = document.createElement('p');
+                 p.classList.add('text-gray-600');
+                 p.textContent = "No se han respondido preguntas para calcular porcentajes.";
+                 percentageDetailsContainer.appendChild(p);
+            }
+        }
+        
+        // --- EVENT LISTENERS ---
+        startButton.addEventListener('click', startQuiz);
+        
+        restartButton.addEventListener('click', () => {
+            restartConfirmModal.classList.remove('hidden');
+        });
+        confirmRestartButton.addEventListener('click', startQuiz);
+        cancelRestartButton.addEventListener('click', () => {
+            restartConfirmModal.classList.add('hidden');
+        });
+
+        backButton.addEventListener('click', goBack);
+
+    </script>
+</body>
+</html>
